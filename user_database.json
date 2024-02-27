@@ -1,0 +1,10 @@
+{
+  "user1": ["AAPL", "IBM", "MSFT", "GOOGL", "AMZN"],
+  "user2": ["AAPL", "TSLA", "META", "NFLX", "NVDA"],
+  "user3": ["BRK/A", "TSM", "ORCL", "CSCO"],
+  "user4": ["JPM", "BAC", "WFC", "C", "GS"], 
+  "user5": ["V", "MA", "PYPL", "SQ", "ADBE"],
+  "user6": ["PFE", "JNJ", "MRK", "GILD", "ABBV"],
+  "user7": ["WMT", "COST", "PG", "KO", "PEP"],
+  "user8": ["DIS", "CMCSA", "CHTR", "VIAC", "LYV"]
+}
