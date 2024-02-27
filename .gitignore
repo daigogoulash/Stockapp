@@ -1,11 +1,29 @@
-# Python
-__pycache__/
-*.pyc
-venv/
-.env
-
-# Node
+# Dependency directories
 node_modules/
+venv/
 
-# React
-/client/build/
+# Python byte-code files
+__pycache__/
+*.py[cod]
+
+# VSCode directory
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Environment secrets
+.env
+.flaskenv
+
+# Packaging
+build/
+dist/
+*.egg-info/
+
