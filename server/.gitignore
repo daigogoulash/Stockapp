@@ -2,6 +2,7 @@
 node_modules/
 venv/
 
+
 # Python byte-code files
 __pycache__/
 *.py[cod]
