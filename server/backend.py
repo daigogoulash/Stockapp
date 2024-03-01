@@ -4,13 +4,20 @@ import os
 from datetime import timedelta, date
 from dotenv import load_dotenv
 from flask import Flask, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from dbmodel import db
+
+app = Flask(__name__)
+
+#configure this to my database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'path/to/your/db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
 
 #Load environment variables 
 load_dotenv()
 apikey = os.getenv("")
 
-
-app = Flask(__name__)
 
 with open ("app/user_database.json", 'r') as userdb:
     db_dict = json.load(userdb)
