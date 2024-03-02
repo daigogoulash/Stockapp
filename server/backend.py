@@ -94,12 +94,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 # #Load environment variables 
-# load_dotenv()
-# apikey = os.getenv("")
+load_dotenv()
+apikey = os.getenv("")
 
 
-# with open ("app/user_database.json", 'r') as userdb:
-#     db_dict = json.load(userdb)
+
 
 # #methods for functionality
     
