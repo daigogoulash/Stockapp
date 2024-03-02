@@ -1,11 +1,54 @@
 import json
 import requests
 import os 
+import logging
 from datetime import timedelta, date
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from config import app, db
 from models import UserProfile, Stock
+
+load_dotenv()
+apikey = os.getenv("")
+
+def get_stock_value(symbol, api_key): #get stock info
+    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={api_key}"
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if 'Time Series (5min)' in data:
+            latest_datetime = max(data['Time Series (5min)']) #filter info to only last value
+            return float(data['Time Series (5min)'][latest_datetime]['4. close']) 
+        elif "Note" in data: #error handling
+            logging.warning(f"API call frequency exceeded for symbol {symbol}")
+        elif "Error Message" in data:
+            logging.error(f"Invalid API call for symbol {symbol}")
+        else:
+            logging.error(f"Unexpected response structure for symbol {symbol}: {data}")
+    except Exception as e:
+        logging.error(f"Error fetching stock data for {symbol}: {str(e)}")
+
+    return None
+
+def get_monthly_stock_data(symbol, api_key): #check to see pq me da el pasado d primero
+    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={symbol}&apikey={api_key}"
+    response = requests.get(url)
+    data = response.json()
+
+    monthly_data = {}
+    if 'Monthly Time Series' in data:
+        # Reverse the order of dates
+        dates = reversed(list(data['Monthly Time Series'].keys()))
+        for date in dates:
+            monthly_data[date] = data['Monthly Time Series'][date]['4. close']
+    else:
+        # Handle cases where the expected data is not in the response
+        pass
+
+    return monthly_data
+
+
 
 
 #get users 
@@ -17,7 +60,7 @@ def getusers():
 
 
 
-@app.route('/add_or_update_users', methods=['GET'])
+@app.route('/update', methods=['GET'])
 def add_or_update_users():
     with open('new_user_db.json', 'r') as file:
         data = json.load(file)
@@ -73,76 +116,103 @@ def create_user():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/update_user/<username>', methods=['PUT']) #all new data nedds to be passed as JSON
+def update_user(username):
+    try:
+        #find the existing user
+        user = UserProfile.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        # Parse data from the request
+        data = request.json
+        updated_stocks_data = data.get('stocks', {})  #dictionary of stock symbols and quantities
+
+        #update stocks for this user
+        for symbol, quantity in updated_stocks_data.items():
+            stock = Stock.query.filter_by(user_id=user.id, symbol=symbol).first()
+            if stock:
+                stock.quantity = quantity
+            else:
+                #add new stock if it doesn't exist
+                new_stock = Stock(symbol=symbol, quantity=quantity, user_id=user.id)
+                db.session.add(new_stock)
+
+        db.session.commit()
+        return jsonify({"message": "User updated successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/portfolio/<username>', methods=['GET'])
+def user_portfolio(username):
+    try:
+        user = UserProfile.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        portfolio = {}
+        total_portfolio_value = 0
+
+        for stock in user.stocks:
+            stock_value = get_stock_value(stock.symbol, apikey)
+            print(stock_value)
+            # Check if stock_value is a float before proceeding
+            if stock_value:
+                individual_stock_value = stock.quantity * stock_value
+                portfolio[stock.symbol] = {
+                    "quantity": stock.quantity,
+                    "current price": stock_value,
+                    "value": individual_stock_value,
+                }
+                total_portfolio_value += individual_stock_value
+            else:
+                # Handle the case where stock_value is not a float (e.g., an error message)
+                portfolio[stock.symbol] = {
+                    "quantity": stock.quantity,
+                    "current price": "Unavailable",
+                    "value": "Unavailable",
+                }
+
+        return jsonify({"username": username,
+                        "portfolio": portfolio,
+                        "total_portfolio_value": total_portfolio_value
+                        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+@app.route("/portfolio/<username>/<stock_symbol>", methods=["GET"])
+def monthly_values(username, stock_symbol):
+    try:
+        user = UserProfile.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+
+        # Check if the specified stock is in the user's portfolio
+        stock = next((s for s in user.stocks if s.symbol == stock_symbol), None)
+        if not stock:
+            return jsonify({"message": "Stock not found in user's portfolio"}), 404
+
+        # Fetch monthly stock data
+        stock_value = get_monthly_stock_data(stock.symbol, apikey)
+        if stock_value:
+            return jsonify({"stock_data": stock_value})
+        else:
+            return jsonify({"message": "Stock data not available"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     with app.app_context(): #instantiate db
         db.create_all() #create model if it hasn't been created 
 
+    load_dotenv()
+    apikey = os.getenv("ALPHA_VANTAGE_KEY")
 
     app.run(debug = True)
 
-
-
-
-
-
-
 app = Flask(__name__)
-
-#configure this to my database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'path/to/your/db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
-
-# #Load environment variables 
-load_dotenv()
-apikey = os.getenv("")
-
-
-
-
-# #methods for functionality
-    
-# def get_last_weekday():
-#     today = date.today()
-#     if today.weekday() == 0:
-#         delta = timedelta(days=3)
-#     elif today.weekday() == 6:
-#         delta = timedelta(days=2)
-#     else:
-#         delta = timedelta(days=1)
-#     return (today - delta).strftime("%Y-%m-%d")
-
-# @app.route('/',methods=['GET'])
-# def welcome():
-#     return print("""Welcome to the first iteration, please use /portfolio or /portfolio/<stock>""")
-
-# @app.route('/portfolio', methods=['GET'])
-# def get_portfolio():
-#     userid = "user1"
-#     list_values = {}
-#     user_portfolio = get_users(username = userid)
-#     for stock in user_portfolio:
-#         url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={stock}&apikey={apikey}"
-#         r = requests.get(url)
-#         data = r.json() 
-#         closing_value = data["Time Series (Daily)"][get_last_weekday()]["4. close"]
-#         list_values[stock] = closing_value
-#     return jsonify(list_values)
-
-# @app.route("/portfolio/<stock>")
-# def get_stock_value(stock):
-#     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={stock}&apikey={apikey}"
-#     r = requests.get(url)
-#     data = r.json()
-#     series = data['Time Series (Daily)']
-#     start_date = (date.today() - timedelta(days=30)).strftime("%Y-%m-%d")
-#     end_date = date.today().strftime("%Y-%m-%d")
-#     filtered_data = {date: details for date, details in series.items() if start_date <= date <= end_date}   
-#     past_stock={}
-#     past_stock["symbol"]=stock
-#     past_stock["values_daily"]=filtered_data
-#     return jsonify(past_stock)
-
-
-
-    
