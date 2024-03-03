@@ -2,7 +2,7 @@ import json
 import requests
 import os 
 import logging
-from datetime import timedelta, date
+from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from config import app, db
@@ -31,17 +31,22 @@ def get_stock_value(symbol, api_key): #get stock info
 
     return None
 
-def get_monthly_stock_data(symbol, api_key): #check to see pq me da el pasado d primero
+def get_monthly_stock_data(symbol, api_key, start_date=None, end_date=None):
     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={symbol}&apikey={api_key}"
     response = requests.get(url)
     data = response.json()
 
     monthly_data = {}
     if 'Monthly Time Series' in data:
-        # Reverse the order of dates
-        dates = reversed(list(data['Monthly Time Series'].keys()))
-        for date in dates:
-            monthly_data[date] = data['Monthly Time Series'][date]['4. close']
+        # Sort and filter the dates based on start_date and end_date
+        for date_str in sorted(data['Monthly Time Series'].keys()):
+            if start_date and datetime.strptime(date_str, '%Y-%m-%d') < start_date:
+                continue
+            if end_date and datetime.strptime(date_str, '%Y-%m-%d') > end_date:
+                continue
+            
+            monthly_data[date_str] = data['Monthly Time Series'][date_str]['4. close']
+
     else:
         # Handle cases where the expected data is not in the response
         pass
@@ -205,6 +210,46 @@ def monthly_values(username, stock_symbol):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/stock/<stock_symbol>", methods=["GET"])
+def historical_values(stock_symbol):
+    try:
+        # Retrieve start and end date from request arguments
+        start_date = request.args.get('start')
+        end_date = request.args.get('end')
+
+        # Optional: Convert the dates from string to datetime objects
+        # (This step depends on how your get_monthly_stock_data function expects the dates)
+        if start_date:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        if end_date:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Fetch stock data for the specified date range
+        stock_value = get_monthly_stock_data(stock_symbol, apikey, start_date, end_date)
+        
+        if stock_value:
+            return jsonify({"stock_data": stock_value})
+        else:
+            return jsonify({"message": "Stock data not available"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+
+# @app.route("/stock/<stock_symbol>", methods=["GET"])
+# def historical_values(stock_symbol):
+#     try:
+#         # Fetch monthly stock data. Replace `get_monthly_stock_data` and `apikey` with your actual function and API key
+#         stock_value = get_monthly_stock_data(stock_symbol, apikey)
+#         if stock_value:
+#             return jsonify({"stock_data": stock_value})
+#         else:
+#             return jsonify({"message": "Stock data not available"}), 404
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     with app.app_context(): #instantiate db

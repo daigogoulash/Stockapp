@@ -10,6 +10,10 @@ function HomePage() {
     navigate("/users");
   };
 
+  const goToStockLookup = () => {
+    navigate("/stock/:symbol")
+  };
+
   const handleSearchClick = () => {
     setShowSearch(true);
   };
@@ -36,6 +40,7 @@ function HomePage() {
         </p>
       </div>
       <button onClick={goToUserList}>See user List</button>
+      <button onClick={goToStockLookup}>Lookup a stock value</button>
       <button onClick={handleSearchClick}>Search for user portfolio</button>
       {showSearch && (
         <input

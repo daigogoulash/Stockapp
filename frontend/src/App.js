@@ -6,6 +6,7 @@ import ContactList from "./Userlist";
 import ContactCreate from "./CreateUser";
 import HomePage from "./HomePage";
 import PortfolioSearch from "./PortfolioSearch";
+import StockDataDisplay from "./StockLookup";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/users" element={<ContactList />} />
         <Route path="/create_user" element={<ContactCreate />} />
         <Route path="/portfolio/:username" element={<PortfolioSearch />} />
+        <Route path="/stock/:symbol" element={<StockDataDisplay />} />
       </Routes>
     </Router>
   );
