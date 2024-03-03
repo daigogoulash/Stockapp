@@ -5,6 +5,7 @@ import "./App.css";
 import ContactList from "./Userlist";
 import ContactCreate from "./CreateUser";
 import HomePage from "./HomePage";
+import PortfolioSearch from "./PortfolioSearch";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/users" element={<ContactList />} />
         <Route path="/create_user" element={<ContactCreate />} />
+        <Route path="/portfolio/:username" element={<PortfolioSearch />} />
       </Routes>
     </Router>
   );

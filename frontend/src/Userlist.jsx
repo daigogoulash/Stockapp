@@ -44,8 +44,8 @@ const ContactList = () => {
                 ))}
               </td>
               <td>
-                <button>Delete User</button>
-                <button>Modify Portfolio</button>
+                <button>Action A, this will be modify portfolio</button>
+                <button>Action B, this will be delete user</button>
               </td>
             </tr>
           ))}
