@@ -2,16 +2,26 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.user-row {
+  border-bottom: 1px solid #cccccc00; /* Use a color that suits your design */
+  margin-bottom: 10px; /* This will not affect table rows, but added for any non-table use */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+
+.stock-row {
+    margin-bottom: 5px; 
 }
+
+th, td {
+  padding: 0 30px; /* Adjust the value to increase or decrease spacing */
+}
+
+.stock-entry {
+  display: block; /* This will ensure each stock is on a new line */
+  padding-bottom: 10px; /* Adjust the value to increase or decrease spacing */
+}
+
+
 
 .App-header {
   background-color: #282c34;

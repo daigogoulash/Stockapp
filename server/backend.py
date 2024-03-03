@@ -91,7 +91,7 @@ def add_or_update_users():
 
 from flask import request, jsonify
 
-@app.route('/create_user', methods=['POST']) #new user data nedds to be added as json
+@app.route('/create_user', methods=['POST']) #new user data needs to be added as json
 def create_user():
     try:
         #parse data from the request
