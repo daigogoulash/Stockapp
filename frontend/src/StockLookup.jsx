@@ -19,7 +19,7 @@ const StockDataDisplay = () => {
       const formattedEndDate = endDate.toISOString().split("T")[0];
 
       const response = await axios.get(
-        `http://127.0.0.1:5000/stock/${symbol}?start=${formattedStartDate}&end=${formattedEndDate}`
+        `https://capstone-ml1.ew.r.appspot.com/stock/${symbol}?start=${formattedStartDate}&end=${formattedEndDate}`
       );
       setStockData(response.data.stock_data);
     } catch (err) {

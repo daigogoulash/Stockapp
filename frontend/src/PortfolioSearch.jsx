@@ -12,7 +12,7 @@ const PortfolioSearch = () => {
       try {
         // Make sure to use the correct URL for your Flask API
         const response = await axios.get(
-          `http://127.0.0.1:5000/portfolio/${username}`
+          `https://capstone-ml1.ew.r.appspot.com/portfolio/${username}`
         );
         setPortfolio(response.data);
       } catch (err) {

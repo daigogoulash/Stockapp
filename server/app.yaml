@@ -1,6 +1,0 @@
-runtime: python311
-
-env_variables:
-  ALPHA_VANTAGE_KEY: 'PGMGQLXTQWX42V8V'
-
-
