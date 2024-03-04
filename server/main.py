@@ -8,8 +8,7 @@ from flask import Flask, jsonify, request
 from config import app, db
 from models import UserProfile, Stock
 
-load_dotenv()
-apikey = os.getenv("")
+apikey = os.getenv('ALPHA_VANTAGE_KEY')
 
 def get_stock_value(symbol, api_key): #get stock info
     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={api_key}"
@@ -236,7 +235,9 @@ def historical_values(stock_symbol):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-
+@app.route("/hello", methods= ["GET"])
+def hello():
+    return "hello"
 
 # @app.route("/stock/<stock_symbol>", methods=["GET"])
 # def historical_values(stock_symbol):
@@ -255,9 +256,8 @@ if __name__ == "__main__":
     with app.app_context(): #instantiate db
         db.create_all() #create model if it hasn't been created 
 
-    load_dotenv()
-    apikey = os.getenv("ALPHA_VANTAGE_KEY")
-
+    #load_dotenv()
+    #moved os.getenv to the top
+    
     app.run(debug = True)
 
-app = Flask(__name__)
