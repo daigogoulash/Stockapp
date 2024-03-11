@@ -1,10 +1,19 @@
 from config import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
-#db model for the users
 class UserProfile(db.Model):   
-    id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(50), unique = False, nullable = False)
-    stocks = db.relationship('Stock', backref= 'user', lazy=True)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=False, nullable=False)
+    password_hash = db.Column(db.String(128))  # New field for storing hashed passwords
+    stocks = db.relationship('Stock', backref='user', lazy=True)
+
+    def set_password(self, password):
+        """Create a hashed password."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Check the hashed password."""
+        return check_password_hash(self.password_hash, password)
 
     def to_json(self):
         return {

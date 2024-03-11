@@ -1,54 +1,66 @@
 /* HomePage.css */
+
 .home-container {
     padding: 20px;
-    background-color: #f5f5f5;
+    background-color: #223476;
     min-height: 100vh;
 }
 
-h1 {
-    font-size: 100px;
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
+.home-header {
+    max-width: 1400px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header-name, .header-value {
+    background-color: #fff; /* White background color for consistency */
+    padding: 20px; /* Padding for the boxes */
+    border-radius: 8px; /* Rounded corners for the boxes */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 1); /* Box shadow for depth */
+    margin-bottom: 20px; /* Spacing between the two boxes */
+    width: 100%; /* Full width within the container */
+    text-align: center; /* Center the text */
+    font-size: 24px; /* Font size for visibility */
+}
+
+.header-value {
+    font-size: 30px; /* Smaller font size for the portfolio value */
 }
 
 .home-content {
-    max-width: 600px;
+    max-width: 1400px;
     margin: 0 auto;
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.stock-item {
+    background-color: #fff; /* White background for the large box */
+    padding: 10px; /* Padding inside the large box */
+    margin-bottom: 20px; /* Spacing between each stock item */
+    border-radius: 8px; /* Rounded corners for the large box */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 1); /* Shadow for depth */
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack children vertically */
 }
 
-.home-content p {
-    color: #666;
-    line-height: 1.5;
+.stock-name {
+    background-color: #7995e6; /* Light gray background for the stock name box */
+    padding: 15px; /* Padding inside the stock name box */
+    margin-bottom: 15px; /* Spacing between stock name and stock details */
+    border-radius: 8px; /* Rounded corners for the stock name box */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05); /* Shadow for depth */
+    text-align: center; /* Center align the stock symbol */
 }
 
-button {
-    display: block;
-    width: auto;
-    padding: 10px ;
-    margin: 50px 50px;
-    border: none;
-    border-radius: 4px;
-    background-color: #080b0e;
-    color: rgb(14, 228, 10);
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+.stock-details {
+    background-color: #b0bbf4; /* Very light gray background for the details box */
+    padding: 15px; /* Padding inside the details box */
+    border-radius: 8px; /* Rounded corners for the details box */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05); /* Shadow for depth */
 }
 
-button:hover {
-    background-color: #0056b3;
-}
-
-input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
+.stock-details p {
+    margin-bottom: 10px; /* Spacing between each detail */
+    line-height: 1.5; /* Line height for better readability */
+    font-size: 1.5em; /* Slightly smaller font size for details */
 }

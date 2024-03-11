@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css"; // include the default styling
+import "react-datepicker/dist/react-datepicker.css";
+import "./StockLookup.css";
+import Banner from "./Banner";
 
 const StockDataDisplay = () => {
   const [symbol, setSymbol] = useState("");
@@ -12,9 +14,8 @@ const StockDataDisplay = () => {
 
   const handleSearch = async () => {
     setError("");
-    setStockData(null); // Clear previous data
+    setStockData(null);
     try {
-      // Format the dates as required by your backend, e.g., YYYY-MM-DD
       const formattedStartDate = startDate.toISOString().split("T")[0];
       const formattedEndDate = endDate.toISOString().split("T")[0];
 
@@ -30,27 +31,38 @@ const StockDataDisplay = () => {
   };
 
   return (
-    <div>
+    <div className="stock-data-display">
+      <Banner />
       <h1>Stock Data Lookup</h1>
-      <input
-        type="text"
-        value={symbol}
-        onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-        placeholder="Enter stock symbol"
-      />
-      <DatePicker
-        selected={startDate}
-        onChange={(date) => setStartDate(date)}
-      />
-      <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} />
-      <button onClick={handleSearch}>Search</button>
+      <div className="search-section">
+        <input
+          type="text"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+          placeholder="Enter stock symbol"
+          className="stock-symbol-input"
+        />
+        <DatePicker
+          selected={startDate}
+          onChange={(date) => setStartDate(date)}
+          className="date-picker"
+        />
+        <DatePicker
+          selected={endDate}
+          onChange={(date) => setEndDate(date)}
+          className="date-picker"
+        />
+        <button onClick={handleSearch} className="search-button">
+          Search
+        </button>
+      </div>
 
-      {error && <p className="error">{error}</p>}
+      {error && <p className="error-message">{error}</p>}
 
       {stockData && (
-        <div>
+        <div className="stock-data">
           <h2>Historical Stock Data for {symbol}</h2>
-          <table>
+          <table className="stock-data-table">
             <thead>
               <tr>
                 <th>Date</th>

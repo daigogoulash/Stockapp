@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
 
-const PortfolioSearch = () => {
-  const { username } = useParams();
+const PortfolioSearch = ({ username, setTotalPortfolioValue }) => {
   const [portfolio, setPortfolio] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchPortfolio = async () => {
+      if (!username) return; // Make sure username is present
       try {
-        // Make sure to use the correct URL for your Flask API
         const response = await axios.get(
           `https://capstone-ml1.ew.r.appspot.com/portfolio/${username}`
         );
         setPortfolio(response.data);
+        setTotalPortfolioValue(response.data.total_portfolio_value); // Update total portfolio value
       } catch (err) {
         setError(
           err.response ? err.response.data.message : "An error occurred"
@@ -22,14 +21,10 @@ const PortfolioSearch = () => {
       }
     };
 
-    if (username) {
-      fetchPortfolio();
-    }
-  }, [username]);
+    fetchPortfolio();
+  }, [username, setTotalPortfolioValue]); // Update dependency array
 
-  // Helper function to format the value
   const formatValue = (value) => {
-    // Check if the value is a number before applying toFixed
     return typeof value === "number" ? value.toFixed(2) : value;
   };
 
@@ -38,7 +33,7 @@ const PortfolioSearch = () => {
       {error && <p>Error: {error}</p>}
       {portfolio && (
         <div>
-          <h2>{portfolio.username}'s Portfolio</h2>
+          <h2>{username}'s Portfolio</h2>
           <p>Total Value: ${formatValue(portfolio.total_portfolio_value)}</p>
           <ul>
             {Object.entries(portfolio.portfolio).map(([symbol, data]) => (

@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from config import app, db
 from models import UserProfile, Stock
+from flask_migrate import Migrate
+
+migrate = Migrate(app, db)
 
 apikey = os.getenv('ALPHA_VANTAGE_KEY')
 
@@ -64,7 +67,7 @@ def getusers():
 
 
 
-@app.route('/update', methods=['GET'])
+@app.route('/update', methods=['GET']) #this is to load the initial json file to db
 def add_or_update_users():
     with open('new_user_db.json', 'r') as file:
         data = json.load(file)
@@ -95,58 +98,67 @@ def add_or_update_users():
 
 from flask import request, jsonify
 
-@app.route('/create_user', methods=['POST']) #new user data needs to be added as json
+@app.route('/create_user', methods=['POST']) #check to see if this works
 def create_user():
     try:
-        #parse data from the request
         data = request.json
         username = data['username']
-        stocks_data = data.get('stocks', {})  #dictionary of stock symbols and quantities
-
-        #create new user
+        password = data['password']  # Get the password from the request
         new_user = UserProfile(username=username)
+        new_user.set_password(password)  # Hash the password
         db.session.add(new_user)
-        db.session.commit()
-
-        #add stocks for this user
-        for symbol, quantity in stocks_data.items():
-            new_stock = Stock(symbol=symbol, quantity=quantity, user_id=new_user.id)
-            db.session.add(new_stock)
-
         db.session.commit()
         return jsonify({"message": "User and stocks added successfully"}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    user = UserProfile.query.filter_by(username=data['username']).first()
+    if user and user.check_password(data['password']):
+        #authentication successful
+        return jsonify({"success": True, "message": "Logged in successfully"}), 200
+    else:
+        #authentication failed
+        return jsonify({"success": False, "message": "Invalid username or password"}), 401
 
 
-@app.route('/update_user/<username>', methods=['PUT']) #all new data nedds to be passed as JSON
+
+
+@app.route('/update_user/<username>', methods=['PUT']) #update user stocks
 def update_user(username):
     try:
-        #find the existing user
         user = UserProfile.query.filter_by(username=username).first()
         if not user:
             return jsonify({"message": "User not found"}), 404
 
-        # Parse data from the request
         data = request.json
-        updated_stocks_data = data.get('stocks', {})  #dictionary of stock symbols and quantities
+        updated_stocks_data = data.get('stocks', {})
 
-        #update stocks for this user
         for symbol, quantity in updated_stocks_data.items():
             stock = Stock.query.filter_by(user_id=user.id, symbol=symbol).first()
-            if stock:
-                stock.quantity = quantity
+
+            if quantity == 0:
+                # Remove stock if quantity is zero
+                if stock:
+                    db.session.delete(stock)
             else:
-                #add new stock if it doesn't exist
-                new_stock = Stock(symbol=symbol, quantity=quantity, user_id=user.id)
-                db.session.add(new_stock)
+                if stock:
+                    # Update existing stock
+                    stock.quantity = quantity
+                else:
+                    # Add new stock
+                    new_stock = Stock(symbol=symbol, quantity=quantity, user_id=user.id)
+                    db.session.add(new_stock)
 
         db.session.commit()
-        return jsonify({"message": "User updated successfully"}), 200
+        return jsonify({"message": "User portfolio updated successfully"}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 
 @app.route('/portfolio/<username>', methods=['GET'])
@@ -187,8 +199,8 @@ def user_portfolio(username):
         return jsonify({"error": str(e)}), 500
     
 
-@app.route("/portfolio/<username>/<stock_symbol>", methods=["GET"])
-def monthly_values(username, stock_symbol):
+@app.route("/portfolio/<username>/<stock_symbol>", methods=["GET"]) #plan on using this to see user's stock
+def monthly_values(username, stock_symbol):                         #stock info after they click on it
     try:
         user = UserProfile.query.filter_by(username=username).first()
         if not user:
@@ -238,19 +250,6 @@ def historical_values(stock_symbol):
 @app.route("/hello", methods= ["GET"])
 def hello():
     return "hello"
-
-# @app.route("/stock/<stock_symbol>", methods=["GET"])
-# def historical_values(stock_symbol):
-#     try:
-#         # Fetch monthly stock data. Replace `get_monthly_stock_data` and `apikey` with your actual function and API key
-#         stock_value = get_monthly_stock_data(stock_symbol, apikey)
-#         if stock_value:
-#             return jsonify({"stock_data": stock_value})
-#         else:
-#             return jsonify({"message": "Stock data not available"}), 404
-
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     with app.app_context(): #instantiate db
