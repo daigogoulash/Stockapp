@@ -19,35 +19,7 @@ import oracledb
 
 
 
-apikey = 'PGMGQLXTQWX42V8V' #os.getenv('ALPHA_VANTAGE_KEY')
 
-un = 'ADMIN'
-pw = 'K@^Q@l#^hXJ6$AhP'
-dsn = '(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=gdbbf4050dd9b94_stockappdb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'
-
-pool = oracledb.create_pool(user=un, password=pw,
-                            dsn=dsn)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'creator': pool.acquire,
-    'poolclass': NullPool
-}
-app.config['SQLALCHEMY_ECHO'] = True
-db.init_app(app)
-
-with app.app_context():
-    db.create_all()
-
-migrate = Migrate(app, db) #used to update the db locally
-
-
-
-
-
-#Oracle base URL:
-ORDS_BASE_URL = "https://gdbbf4050dd9b94-stockappdb.adb.eu-madrid-1.oraclecloudapps.com/ords/"
 
 def token_required(f): #token validation
     @wraps(f)
@@ -232,7 +204,7 @@ def update_user(current_user):
 
 
 
-@app.route('/portfolio', methods=['GET'])
+@app.route('/api/portfolio', methods=['GET']) #change to api/portfolio
 @token_required
 def user_portfolio(current_user):
     try:
@@ -268,7 +240,7 @@ def user_portfolio(current_user):
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/portfolio/stock/<stock_symbol>", methods=["GET"])
+@app.route("/api/portfolio/stock/<stock_symbol>", methods=["GET"]) #change to api/portfolio/stock
 @token_required
 def monthly_values(current_user, stock_symbol):
     try:
@@ -289,7 +261,7 @@ def monthly_values(current_user, stock_symbol):
 
 
 
-@app.route("/stock/<stock_symbol>", methods=["GET"])
+@app.route("/api/stock/<stock_symbol>", methods=["GET"]) #change to api/stock
 def historical_values(stock_symbol):
     try:
         # Retrieve start and end date from request arguments
@@ -314,9 +286,6 @@ def historical_values(stock_symbol):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route("/hello", methods= ["GET"])
-def hello():
-    return "hello"
 
 if __name__ == "__main__":
     app.run(debug = True)
