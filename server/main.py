@@ -16,6 +16,8 @@ migrate = Migrate(app, db) #used to update the db locally
 
 apikey = os.getenv('ALPHA_VANTAGE_KEY')
 
+
+
 #Oracle base URL:
 ORDS_BASE_URL = "https://gdbbf4050dd9b94-stockappdb.adb.eu-madrid-1.oraclecloudapps.com/ords/"
 
