@@ -11,10 +11,38 @@ from models import UserProfile, Stock
 from flask_migrate import Migrate
 import jwt
 from functools import wraps
+from flask import Flask, jsonify
+import requests
+from flask_cors import CORS
+from sqlalchemy.pool import NullPool
+import oracledb
+
+
+
+apikey = 'PGMGQLXTQWX42V8V' #os.getenv('ALPHA_VANTAGE_KEY')
+
+un = 'ADMIN'
+pw = 'K@^Q@l#^hXJ6$AhP'
+dsn = '(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-madrid-1.oraclecloud.com))(connect_data=(service_name=gdbbf4050dd9b94_stockappdb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'
+
+pool = oracledb.create_pool(user=un, password=pw,
+                            dsn=dsn)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'creator': pool.acquire,
+    'poolclass': NullPool
+}
+app.config['SQLALCHEMY_ECHO'] = True
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
 
 migrate = Migrate(app, db) #used to update the db locally
 
-apikey = os.getenv('ALPHA_VANTAGE_KEY')
+
 
 
 
@@ -198,6 +226,7 @@ def update_user(current_user):
         return jsonify({"message": "User portfolio updated successfully"}), 200
     except Exception as e:
         db.session.rollback()
+        app.logger.error(f"Exception: {e}", exc_info=True)  # Log the full exception
         return jsonify({"error": str(e)}), 500
 
 
@@ -290,11 +319,5 @@ def hello():
     return "hello"
 
 if __name__ == "__main__":
-    with app.app_context(): #instantiate db
-        db.create_all() #create model if it hasn't been created 
-
-    #load_dotenv()
-    #moved os.getenv to the top
-    
     app.run(debug = True)
 
