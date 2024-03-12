@@ -3,15 +3,46 @@ import requests
 import os 
 import logging
 from datetime import datetime
+import datetime
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from config import app, db
 from models import UserProfile, Stock
 from flask_migrate import Migrate
+import jwt
+from functools import wraps
 
-migrate = Migrate(app, db)
+migrate = Migrate(app, db) #used to update the db locally
 
 apikey = os.getenv('ALPHA_VANTAGE_KEY')
+
+#Oracle base URL:
+ORDS_BASE_URL = "https://gdbbf4050dd9b94-stockappdb.adb.eu-madrid-1.oraclecloudapps.com/ords/"
+
+def token_required(f): #token validation
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 403
+
+        if token.startswith('Bearer '):
+            token = token.split(" ")[1]  # Remove the "Bearer " prefix
+
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            current_user = UserProfile.query.filter_by(username=data['sub']).first()
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired'}), 401
+        except jwt.DecodeError:
+            return jsonify({'message': 'Error decoding token'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'message': 'Invalid token'}), 401
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
 
 def get_stock_value(symbol, api_key): #get stock info
     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={api_key}"
@@ -113,32 +144,40 @@ def create_user():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
     
-@app.route('/login', methods=['POST'])
+    
+@app.route('/login', methods=['POST']) #adding token validation
 def login():
     data = request.json
     user = UserProfile.query.filter_by(username=data['username']).first()
     if user and user.check_password(data['password']):
-        #authentication successful
-        return jsonify({"success": True, "message": "Logged in successfully"}), 200
+        #generate JWT Token
+        token = jwt.encode({
+            'sub': user.username,
+            'iat': datetime.datetime.utcnow(),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # Token expires in 1 hour
+        }, app.config['SECRET_KEY'], algorithm="HS256")
+
+        return jsonify({
+            "success": True, 
+            "message": "Logged in successfully",
+            "token": token
+        }), 200
     else:
-        #authentication failed
+        # Authentication failed
         return jsonify({"success": False, "message": "Invalid username or password"}), 401
 
 
 
 
-@app.route('/update_user/<username>', methods=['PUT']) #update user stocks
-def update_user(username):
+@app.route('/update_user', methods=['PUT'])
+@token_required
+def update_user(current_user):
     try:
-        user = UserProfile.query.filter_by(username=username).first()
-        if not user:
-            return jsonify({"message": "User not found"}), 404
-
         data = request.json
         updated_stocks_data = data.get('stocks', {})
 
         for symbol, quantity in updated_stocks_data.items():
-            stock = Stock.query.filter_by(user_id=user.id, symbol=symbol).first()
+            stock = Stock.query.filter_by(user_id=current_user.id, symbol=symbol).first()
 
             if quantity == 0:
                 # Remove stock if quantity is zero
@@ -150,7 +189,7 @@ def update_user(username):
                     stock.quantity = quantity
                 else:
                     # Add new stock
-                    new_stock = Stock(symbol=symbol, quantity=quantity, user_id=user.id)
+                    new_stock = Stock(symbol=symbol, quantity=quantity, user_id=current_user.id)
                     db.session.add(new_stock)
 
         db.session.commit()
@@ -161,20 +200,18 @@ def update_user(username):
 
 
 
-@app.route('/portfolio/<username>', methods=['GET'])
-def user_portfolio(username):
-    try:
-        user = UserProfile.query.filter_by(username=username).first()
-        if not user:
-            return jsonify({"message": "User not found"}), 404
 
+@app.route('/portfolio', methods=['GET'])
+@token_required
+def user_portfolio(current_user):
+    try:
+        #using current_user directly instead of username from the URL
         portfolio = {}
         total_portfolio_value = 0
 
-        for stock in user.stocks:
+        for stock in current_user.stocks:
             stock_value = get_stock_value(stock.symbol, apikey)
-            print(stock_value)
-            # Check if stock_value is a float before proceeding
+            #check if stock value is available
             if stock_value:
                 individual_stock_value = stock.quantity * stock_value
                 portfolio[stock.symbol] = {
@@ -184,30 +221,28 @@ def user_portfolio(username):
                 }
                 total_portfolio_value += individual_stock_value
             else:
-                # Handle the case where stock_value is not a float (e.g., an error message)
+                #handle cases where stock value is not available
                 portfolio[stock.symbol] = {
                     "quantity": stock.quantity,
                     "current price": "Unavailable",
                     "value": "Unavailable",
                 }
 
-        return jsonify({"username": username,
-                        "portfolio": portfolio,
-                        "total_portfolio_value": total_portfolio_value
-                        }), 200
+        return jsonify({
+            "username": current_user.username,
+            "portfolio": portfolio,
+            "total_portfolio_value": total_portfolio_value
+        }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
 
-@app.route("/portfolio/<username>/<stock_symbol>", methods=["GET"]) #plan on using this to see user's stock
-def monthly_values(username, stock_symbol):                         #stock info after they click on it
+
+@app.route("/portfolio/stock/<stock_symbol>", methods=["GET"])
+@token_required
+def monthly_values(current_user, stock_symbol):
     try:
-        user = UserProfile.query.filter_by(username=username).first()
-        if not user:
-            return jsonify({"message": "User not found"}), 404
-
-        # Check if the specified stock is in the user's portfolio
-        stock = next((s for s in user.stocks if s.symbol == stock_symbol), None)
+        # Check if the specified stock is in the current user's portfolio
+        stock = next((s for s in current_user.stocks if s.symbol == stock_symbol), None)
         if not stock:
             return jsonify({"message": "Stock not found in user's portfolio"}), 404
 
@@ -220,6 +255,7 @@ def monthly_values(username, stock_symbol):                         #stock info 
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 @app.route("/stock/<stock_symbol>", methods=["GET"])

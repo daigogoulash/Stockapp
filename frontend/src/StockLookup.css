@@ -1,0 +1,84 @@
+/* Styles for the stock data display component */
+.stock-data-display {
+    background-color: #223476; /* Light grey background */
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+
+
+/* Styles for the search section */
+.search-section {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Styles for the stock symbol input field */
+.stock-symbol-input {
+    margin-right: 10px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Styles for the date pickers */
+.date-picker {
+    margin-right: 10px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Styles for the search button */
+.search-button {
+    padding: 5px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: #0056b3;
+}
+
+/* Styles for the error message */
+.error-message {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Styles for the stock data section */
+.stock-data {
+    margin-top: 20px;
+    border: #ccc solid 1px;
+}
+
+/* Styles for the stock data table */
+.stock-data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stock-data-table th, 
+.stock-data-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.stock-data-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Change table color */
+.stock-data-table  {
+    background-color: #ccc9c9;
+}
+
+.stock-data-table tr:hover {
+    background-color: #9c9999;
+}

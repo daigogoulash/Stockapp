@@ -23,6 +23,7 @@ Thumbs.db
 .env
 .flaskenv
 app.yaml
+config.py
 
 # Packaging
 build/

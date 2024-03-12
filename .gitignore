@@ -1,0 +1,3 @@
+node_modules
+.stonks_env/.
+/server/config.py

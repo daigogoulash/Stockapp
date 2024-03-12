@@ -1,0 +1,42 @@
+/* Banner.css */
+
+.banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 90px; /* Adjusted to be consistent with other elements */
+  background-color: #fff; /* Changed to white for consistency */
+  border-radius: 8px; /* Rounded corners for the box */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 1); /* Shadow for depth */
+  position: relative; /* Adjust position to fit the container properly */
+  left: 50%; /* Half of the element's width */
+  right: 50%; /* Half of the element's width */
+  transform: translateX(-50%); /* Center the element */
+  width: calc(100% ); /* Full width plus padding compensation */
+  top: 0;
+}
+
+.banner img {
+  max-width: 200%;
+  height: 150px;
+  margin-right: 20px; /* Add some space between the image and buttons */
+}
+
+
+.banner-button {
+  margin-left: 10px;
+  margin-right: 20px;
+  padding: 20px 35px;
+  border: none; /* Removed border for a cleaner look */
+  border-radius: 4px;
+  background-color: #223476; /* Blue color */
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Consistent shadow for buttons */
+}
+
+.banner-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
