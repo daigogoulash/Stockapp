@@ -33,7 +33,7 @@ const StockDataDisplay = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `https://capstone-ml1.ew.r.appspot.com/api/stock/${symbol}`
+          `https://capstone-ml1.ew.r.appspot.com/api/portfolio/${symbol}` //changed to api/portfolio
         );
         setStockData(response.data.stock_data);
       } catch (err) {
