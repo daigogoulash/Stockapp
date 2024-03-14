@@ -18,6 +18,23 @@ from sqlalchemy.pool import NullPool
 import oracledb
 
 
+#sensitive db and passkey info passed down to config.py file not in the github
+
+pool = oracledb.create_pool(user=un, password=pw,
+                            dsn=dsn)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'creator': pool.acquire,
+    'poolclass': NullPool
+}
+app.config['SQLALCHEMY_ECHO'] = True
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
 
 
 
@@ -182,15 +199,15 @@ def update_user(current_user):
             stock = Stock.query.filter_by(user_id=current_user.id, symbol=symbol).first()
 
             if quantity == 0:
-                # Remove stock if quantity is zero
+                #remove stock if quantity is zero
                 if stock:
                     db.session.delete(stock)
             else:
                 if stock:
-                    # Update existing stock
+                    #update existing stock
                     stock.quantity = quantity
                 else:
-                    # Add new stock
+                    #add new stock
                     new_stock = Stock(symbol=symbol, quantity=quantity, user_id=current_user.id)
                     db.session.add(new_stock)
 
@@ -198,7 +215,7 @@ def update_user(current_user):
         return jsonify({"message": "User portfolio updated successfully"}), 200
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"Exception: {e}", exc_info=True)  # Log the full exception
+        app.logger.error(f"Exception: {e}", exc_info=True)  #log the full exception
         return jsonify({"error": str(e)}), 500
 
 

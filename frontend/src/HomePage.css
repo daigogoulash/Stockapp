@@ -90,3 +90,10 @@
     line-height: 1.5; /* Line height for better readability */
     font-size: 1.5em; /* Slightly smaller font size for details */
 }
+
+.loading-message{
+    font-size: 60px; /* Font size for visibility */
+    text-align: center; /* Center the text */
+    margin-top: 20px; /* Spacing from the top */
+    color: #ffffff; /* White text color */
+}

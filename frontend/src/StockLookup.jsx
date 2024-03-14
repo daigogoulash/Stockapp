@@ -1,34 +1,87 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "./StockLookup.css";
 import Banner from "./Banner";
+import { Line } from "react-chartjs-2";
+import "chart.js/auto";
 
 const StockDataDisplay = () => {
   const [symbol, setSymbol] = useState("");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [stockData, setStockData] = useState(null);
+  const [filteredStockData, setFilteredStockData] = useState(null);
   const [error, setError] = useState("");
 
-  const handleSearch = async () => {
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: "Stock Price",
+        data: [],
+        borderColor: "rgba(75,192,192,1)",
+        borderWidth: 2,
+      },
+    ],
+  });
+
+  useEffect(() => {
     setError("");
     setStockData(null);
-    try {
-      const formattedStartDate = startDate.toISOString().split("T")[0];
-      const formattedEndDate = endDate.toISOString().split("T")[0];
+    setFilteredStockData(null);
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `https://capstone-ml1.ew.r.appspot.com/api/stock/${symbol}`
+        );
+        setStockData(response.data.stock_data);
+      } catch (err) {
+        setError(
+          "Failed to fetch stock data. Please make sure the symbol is correct."
+        );
+      }
+    };
 
-      const response = await axios.get(
-        `https://capstone-ml1.ew.r.appspot.com/stock/${symbol}?start=${formattedStartDate}&end=${formattedEndDate}`
-      );
-      setStockData(response.data.stock_data);
-    } catch (err) {
-      setError(
-        "Failed to fetch stock data. Please make sure the symbol is correct and dates are valid."
-      );
+    if (symbol) {
+      fetchData();
     }
-  };
+  }, [symbol]);
+
+  useEffect(() => {
+    if (stockData) {
+      const newFilteredData = Object.entries(stockData)
+        .filter(([date]) => {
+          const currentDate = new Date(date);
+          return currentDate >= startDate && currentDate <= endDate;
+        })
+        .reduce((acc, [date, value]) => {
+          acc[date] = value;
+          return acc;
+        }, {});
+      setFilteredStockData(newFilteredData);
+    }
+  }, [stockData, startDate, endDate]);
+
+  useEffect(() => {
+    const updateChartData = () => {
+      setChartData({
+        labels: Object.keys(filteredStockData),
+        datasets: [
+          {
+            label: "Stock Price",
+            data: Object.values(filteredStockData),
+            borderColor: "rgba(75,192,192,1)",
+            borderWidth: 2,
+          },
+        ],
+      });
+    };
+
+    if (filteredStockData) {
+      updateChartData();
+    }
+  }, [filteredStockData]);
 
   return (
     <div className="stock-data-display">
@@ -52,16 +105,14 @@ const StockDataDisplay = () => {
           onChange={(date) => setEndDate(date)}
           className="date-picker"
         />
-        <button onClick={handleSearch} className="search-button">
-          Search
-        </button>
       </div>
 
       {error && <p className="error-message">{error}</p>}
 
-      {stockData && (
+      {filteredStockData && (
         <div className="stock-data">
           <h2>Historical Stock Data for {symbol}</h2>
+          <Line data={chartData} />
           <table className="stock-data-table">
             <thead>
               <tr>
@@ -70,7 +121,7 @@ const StockDataDisplay = () => {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(stockData).map(([date, value]) => (
+              {Object.entries(filteredStockData).map(([date, value]) => (
                 <tr key={date}>
                   <td>{date}</td>
                   <td>${value}</td>

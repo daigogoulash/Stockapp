@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const PortfolioSearch = ({ username, setTotalPortfolioValue }) => {
+const PortfolioSearch = ({ username, setTotalPortfolioValue }) => { //consider taking this out since it is not used
   const [portfolio, setPortfolio] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchPortfolio = async () => {
-      if (!username) return; // Make sure username is present
+      if (!username) return; //make sure username is present
       try {
         const response = await axios.get(
-          `https://capstone-ml1.ew.r.appspot.com/portfolio/${username}`
+          `https://capstone-ml1.ew.r.appspot.com/api/portfolio/${username}` //put the '/api/' in
         );
         setPortfolio(response.data);
-        setTotalPortfolioValue(response.data.total_portfolio_value); // Update total portfolio value
+        setTotalPortfolioValue(response.data.total_portfolio_value); //update total portfolio value
       } catch (err) {
         setError(
           err.response ? err.response.data.message : "An error occurred"
@@ -22,7 +22,7 @@ const PortfolioSearch = ({ username, setTotalPortfolioValue }) => {
     };
 
     fetchPortfolio();
-  }, [username, setTotalPortfolioValue]); // Update dependency array
+  }, [username, setTotalPortfolioValue]); //update dependency array
 
   const formatValue = (value) => {
     return typeof value === "number" ? value.toFixed(2) : value;

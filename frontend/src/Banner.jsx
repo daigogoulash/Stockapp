@@ -20,8 +20,8 @@ function Banner() {
 
     // Navigate to the login page
     navigate("/");
-    // Optional: Reload the page
-    // setTimeout(() => window.location.reload(), 100);
+    
+    setTimeout(() => window.location.reload(), 100);
   };
 
   return (

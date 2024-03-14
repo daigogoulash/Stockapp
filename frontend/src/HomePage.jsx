@@ -4,22 +4,27 @@ import Banner from "./Banner";
 import "./HomePage.css";
 import { useNavigate } from "react-router-dom";
 
-function HomePage({ isLoggedIn }) {
+function HomePage({ isLoggedIn, username }) {
   const navigate = useNavigate();
   const [stocks, setStocks] = useState([]);
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0);
+  const [isLoading, setIsLoading] = useState(false); // State to track loading status
 
   useEffect(() => {
-    fetchPortfolioData(); // Refactor to call fetchPortfolioData directly
+    fetchPortfolioData();
   }, [isLoggedIn]);
 
   const fetchPortfolioData = async () => {
+    setIsLoading(true); // Set loading to true before API call
     const token = localStorage.getItem("token");
-    if (!token) return; // Exit if no token
+    if (!token) {
+      setIsLoading(false);
+      return; // Exit if no token
+    }
 
     try {
       const response = await axios.get(
-        `http://127.0.0.1:5000/portfolio`, // `https://capstone-ml1.ew.r.appspot.com/portfolio` for deployment
+        `https://capstone-ml1.ew.r.appspot.com/api/portfolio`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const { portfolio, total_portfolio_value } = response.data;
@@ -34,6 +39,8 @@ function HomePage({ isLoggedIn }) {
       console.error("Error fetching portfolio data:", error);
       setStocks([]);
       setTotalPortfolioValue(0);
+    } finally {
+      setIsLoading(false); // Set loading to false after API call
     }
   };
 
@@ -48,24 +55,23 @@ function HomePage({ isLoggedIn }) {
 
     try {
       await axios.put(
-        `http://127.0.0.1:5000/update_user`, // `https://capstone-ml1.ew.r.appspot.com/update_user` for deployment
+        `https://capstone-ml1.ew.r.appspot.com/update_user`,
         { stocks: { [symbol]: 0 } },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      fetchPortfolioData(); // Refetch the portfolio data to update the UI, check if it works
+      fetchPortfolioData(); // Refetch the portfolio data to update the UI
     } catch (error) {
       console.error("Error removing stock:", error);
-      alert("Failed to remove stock. Please try again."); // Optionally add an error alert
+      alert("Failed to remove stock. Please try again.");
     }
   };
-
 
   return (
     <div className="home-container">
       {isLoggedIn && <Banner portfolioValue={totalPortfolioValue} />}
       <div className="home-header">
         <div className="header-name">
-          <h1>Welcome to Your Portfolio!</h1>
+          <h1>Welcome to Your Portfolio, {username} !</h1> 
         </div>
         <div className="header-value">
           <p>Total Portfolio Value: ${totalPortfolioValue}</p>
@@ -80,26 +86,34 @@ function HomePage({ isLoggedIn }) {
         )}
       </div>
       <div className="home-content">
-        {isLoggedIn &&
+        {isLoading ? (
+          <div className="loading-message">
+            <p>Loading portfolio data...</p>
+          </div>
+        ) : (
           stocks.map((stock) => (
             <div key={stock.symbol} className="stock-item">
               <div className="stock-name">
                 <h3>{stock.symbol}</h3>
               </div>
               <div className="stock-details">
-                <p>Current Price: {stock["current price"]}</p>
+                <p>Current Price: ${stock["current price"]}</p>
                 <p>Quantity: {stock.quantity}</p>
-                <p>Total Value: {stock.value}</p>
-                <button className="remove-stock-button"
-                  onClick={() => removeStock(stock.symbol)}>
+                <p>Total Value: ${stock.value}</p>
+                <button
+                  className="remove-stock-button"
+                  onClick={() => removeStock(stock.symbol)}
+                >
                   Remove Stock
                 </button>
               </div>
             </div>
-          ))}
+          ))
+        )}
       </div>
     </div>
   );
+
 }
 
 export default HomePage;

@@ -12,7 +12,7 @@ const UpdatePortfolioForm = () => {
 
     try {
       await axios.put(
-        "http://127.0.0.1:5000/update_user", // "https://capstone-ml1.ew.r.appspot.com/update_user" for deploying
+        "https://capstone-ml1.ew.r.appspot.com/update_user", // "https://capstone-ml1.ew.r.appspot.com/update_user" for deploying
         { stocks: { [symbol]: parseInt(quantity, 10) } },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -25,8 +25,11 @@ const UpdatePortfolioForm = () => {
   };
 
   return (
+    
     <>
-      <Banner />
+      <div>
+        <Banner />
+      </div>
       <form onSubmit={handleUpdate}>
         <input
           type="text"

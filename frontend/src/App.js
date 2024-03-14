@@ -18,7 +18,7 @@ function App() {
 
   const handleLogin = async (usernameInput, password) => {
     try {
-      const loginUrl = "http://127.0.0.1:5000/login"; // Change this when deploying "https://capstone-ml1.ew.r.appspot.com/login"
+      const loginUrl = "https://capstone-ml1.ew.r.appspot.com/login"; // Change this when deploying "https://capstone-ml1.ew.r.appspot.com/login"
       const response = await fetch(loginUrl, {
         method: "POST",
         headers: {
@@ -75,7 +75,7 @@ function App() {
         />
         <Route path="/stock/:symbol" element={<StockDataDisplay />} />
         <Route path = "/update_user" element={<UpdatePortfolioForm />} />
-        {/* ... other routes ... */}
+        
       </Routes>
     </Router>
   );
