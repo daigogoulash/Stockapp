@@ -8,16 +8,25 @@
 }
 
 .search-section {
+    display: flex;
+    justify-content: space-around; /* This will space out your input fields evenly */
     max-width: 800px;
     margin: 20px auto;
-    text-align: center; /* Center the search section */
+    text-align: center;
 }
 
 .stock-symbol-input, .date-picker {
     padding: 10px;
-    margin: 10px;
+    margin: 0 10px; /* Adjust the margin as needed */
     border-radius: 4px;
-    border: 1px solid #7995e6; /* Style to match the homepage */
+    border: 1px solid #7995e6; /* Keeps the border the same on focus */
+    box-sizing: border-box;
+    outline: none;
+    flex: 1 1 auto; /* Allows the input to grow */
+}
+
+.stock-symbol-input:focus, .date-picker:focus {
+    border: 1px solid #456789; /* Example focus color, make sure to offset the increased border width with negative margin if needed */
 }
 
 .date-picker {
@@ -28,6 +37,13 @@
     color: #ff0000; /* Red color for errors */
     text-align: center;
     margin-top: 10px;
+}
+
+.lookup-header {
+    text-align: center;
+    color: #FFF; /* Example color */
+    margin-bottom: 20px; /* Spacing below the header */
+    /* Add more styles as needed */
 }
 
 .data-container {
@@ -46,6 +62,8 @@
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     max-width: calc(50% - 10px);
+    height: 600px; /* Set a fixed height for the container */
+    overflow: auto; /* Enable scrolling */
 }
 
 @media (max-width: 768px) {

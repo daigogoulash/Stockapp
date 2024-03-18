@@ -87,7 +87,11 @@ const StockDataDisplay = () => {
   return (
     <div className="stock-data-display">
       <Banner />
-      <h1>Stock Data Lookup</h1>
+      <div className="lookup-header">
+        {" "}
+        {/* New div for the header */}
+        <h1>Stock Data Lookup</h1>
+      </div>
       <div className="search-section">
         <input
           type="text"
