@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Banner from "./Banner";
+import "./addUpdateStocks.css";
+
 
 const UpdatePortfolioForm = () => {
   const [symbol, setSymbol] = useState("");
@@ -25,29 +27,32 @@ const UpdatePortfolioForm = () => {
   };
 
   return (
-    
-    <>
-      <div>
-        <Banner />
-      </div>
-      <form onSubmit={handleUpdate}>
+    <div className="update-portfolio-container">
+      <Banner />
+      <form onSubmit={handleUpdate} className="update-portfolio-form">
+        <label className="form-label">Stock Symbol</label>
         <input
           type="text"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value)}
           placeholder="Stock Symbol"
           required
+          className="update-portfolio-input"
         />
+        <label className="form-label">Quantity</label>
         <input
           type="number"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
           placeholder="Quantity"
           required
+          className="update-portfolio-input"
         />
-        <button type="submit">Update Portfolio</button>
+        <button type="submit" className="update-portfolio-button">
+          Update Portfolio
+        </button>
       </form>
-    </>
+    </div>
   );
 };
 
