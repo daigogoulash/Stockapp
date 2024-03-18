@@ -15,7 +15,7 @@ from flask_cors import CORS
 from sqlalchemy.pool import NullPool
 import oracledb
 
-
+CORS(app)  #avoid cross origin errors
 #sensitive db and passkey info passed down to config.py file not in the github
 
 pool = oracledb.create_pool(user=un, password=pw,
