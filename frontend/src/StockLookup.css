@@ -1,84 +1,73 @@
-/* Styles for the stock data display component */
+/* StockDataDisplay.css */
+
 .stock-data-display {
-    background-color: #223476; /* Light grey background */
     padding: 20px;
-    font-family: Arial, sans-serif;
+    background-color: #223476; /* Same background as the homepage */
+    min-height: 100vh;
+    color: #7e4d4d; /* For text color */
 }
 
-
-
-/* Styles for the search section */
 .search-section {
-    margin-bottom: 20px;
-    text-align: center;
+    max-width: 800px;
+    margin: 20px auto;
+    text-align: center; /* Center the search section */
 }
 
-/* Styles for the stock symbol input field */
-.stock-symbol-input {
-    margin-right: 10px;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
+.stock-symbol-input, .date-picker {
+    padding: 10px;
+    margin: 10px;
     border-radius: 4px;
+    border: 1px solid #7995e6; /* Style to match the homepage */
 }
 
-/* Styles for the date pickers */
 .date-picker {
-    margin-right: 10px;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    color: #000000; /* Text color for the date picker */
 }
 
-/* Styles for the search button */
-.search-button {
-    padding: 5px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.search-button:hover {
-    background-color: #0056b3;
-}
-
-/* Styles for the error message */
 .error-message {
-    color: red;
+    color: #ff0000; /* Red color for errors */
     text-align: center;
     margin-top: 10px;
 }
 
-/* Styles for the stock data section */
-.stock-data {
-    margin-top: 20px;
-    border: #ccc solid 1px;
+.data-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
-/* Styles for the stock data table */
+.graph-container,
+.table-container {
+    flex: 1;
+    background-color: #ffffff;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    max-width: calc(50% - 10px);
+}
+
+@media (max-width: 768px) {
+    .graph-container,
+    .table-container {
+        max-width: 100%;
+    }
+}
+
 .stock-data-table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 20px;
 }
 
-.stock-data-table th, 
-.stock-data-table td {
+.stock-data-table th, .stock-data-table td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
 }
 
 .stock-data-table th {
-    background-color: #007bff;
+    background-color: #7995e6;
     color: white;
-}
-
-/* Change table color */
-.stock-data-table  {
-    background-color: #ccc9c9;
-}
-
-.stock-data-table tr:hover {
-    background-color: #9c9999;
 }

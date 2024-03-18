@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Banner from "./Banner";
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
+import "./StockLookup.css"; // Ensure this is the correct path
 
 const StockDataDisplay = () => {
   const [symbol, setSymbol] = useState("");
@@ -33,7 +34,7 @@ const StockDataDisplay = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `https://capstone-ml1.ew.r.appspot.com/api/portfolio/${symbol}` //changed to api/portfolio
+          `https://capstone-ml1.ew.r.appspot.com/api/portfolio/${symbol}`
         );
         setStockData(response.data.stock_data);
       } catch (err) {
@@ -110,25 +111,29 @@ const StockDataDisplay = () => {
       {error && <p className="error-message">{error}</p>}
 
       {filteredStockData && (
-        <div className="stock-data">
-          <h2>Historical Stock Data for {symbol}</h2>
-          <Line data={chartData} />
-          <table className="stock-data-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(filteredStockData).map(([date, value]) => (
-                <tr key={date}>
-                  <td>{date}</td>
-                  <td>${value}</td>
+        <div className="data-container">
+          <div className="table-container">
+            <table className="stock-data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Value</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {Object.entries(filteredStockData).map(([date, value]) => (
+                  <tr key={date}>
+                    <td>{date}</td>
+                    <td>${value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="graph-container">
+            <h2>Historical Stock Data for {symbol}</h2>
+            <Line data={chartData} />
+          </div>
         </div>
       )}
     </div>
