@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import { HashRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
@@ -16,9 +16,20 @@ function App() {
   const [username, setUsername] = useState("");
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0);
 
+  // Check local storage for token and username when the component mounts
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const storedUsername = localStorage.getItem("username");
+
+    if (token && storedUsername) {
+      setIsLoggedIn(true);
+      setUsername(storedUsername);
+    }
+  }, []);
+
   const handleLogin = async (usernameInput, password) => {
     try {
-      const loginUrl = "https://capstone-ml1.ew.r.appspot.com/login"; // Change this when deploying "https://capstone-ml1.ew.r.appspot.com/login"
+      const loginUrl = "https://capstone-ml1.ew.r.appspot.com/login";
       const response = await fetch(loginUrl, {
         method: "POST",
         headers: {
@@ -32,7 +43,7 @@ function App() {
         if (data.success) {
           setIsLoggedIn(true);
           setUsername(usernameInput);
-          localStorage.setItem("token", data.token); // Assuming the token is in data.token
+          localStorage.setItem("token", data.token);
           localStorage.setItem("username", usernameInput);
         } else {
           alert("Login failed: " + data.message);
@@ -74,8 +85,7 @@ function App() {
           }
         />
         <Route path="/stock/:symbol" element={<StockDataDisplay />} />
-        <Route path = "/update_user" element={<UpdatePortfolioForm />} />
-        
+        <Route path="/update_user" element={<UpdatePortfolioForm />} />
       </Routes>
     </Router>
   );

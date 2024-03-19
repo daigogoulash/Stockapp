@@ -66,15 +66,21 @@ function HomePage({ isLoggedIn, username }) {
     }
   };
 
+  const formatCurrency = (value) => {
+    return Number(value).toFixed(2);
+  };
+
   return (
     <div className="home-container">
-      {isLoggedIn && <Banner portfolioValue={totalPortfolioValue} />}
+      {isLoggedIn && (
+        <Banner portfolioValue={formatCurrency(totalPortfolioValue)} />
+      )}
       <div className="home-header">
         <div className="header-name">
-          <h1>Welcome to Your Portfolio, {username} !</h1> 
+          <h1>Welcome to Your Portfolio, {username}!</h1>
         </div>
         <div className="header-value">
-          <p>Total Portfolio Value: ${totalPortfolioValue}</p>
+          <p>Total Portfolio Value: ${formatCurrency(totalPortfolioValue)}</p>
         </div>
         {isLoggedIn && (
           <button
@@ -97,9 +103,9 @@ function HomePage({ isLoggedIn, username }) {
                 <h3>{stock.symbol}</h3>
               </div>
               <div className="stock-details">
-                <p>Current Price: ${stock["current price"]}</p>
+                <p>Current Price: ${formatCurrency(stock["current price"])}</p>
                 <p>Quantity: {stock.quantity}</p>
-                <p>Total Value: ${stock.value}</p>
+                <p>Total Value: ${formatCurrency(stock.value)}</p>
                 <button
                   className="remove-stock-button"
                   onClick={() => removeStock(stock.symbol)}
@@ -113,7 +119,6 @@ function HomePage({ isLoggedIn, username }) {
       </div>
     </div>
   );
-
 }
 
 export default HomePage;
