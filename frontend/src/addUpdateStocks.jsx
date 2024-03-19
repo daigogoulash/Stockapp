@@ -3,7 +3,6 @@ import axios from "axios";
 import Banner from "./Banner";
 import "./addUpdateStocks.css";
 
-
 const UpdatePortfolioForm = () => {
   const [symbol, setSymbol] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -12,10 +11,17 @@ const UpdatePortfolioForm = () => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
+    // Convert quantity to a number and check if it's negative
+    const quantityNumber = parseInt(quantity, 10);
+    if (quantityNumber < 0) {
+      alert("Quantity cannot be negative. Please enter a valid value.");
+      return; // Stop the function execution if quantity is negative
+    }
+
     try {
       await axios.put(
-        "https://capstone-ml1.ew.r.appspot.com/update_user", // "https://capstone-ml1.ew.r.appspot.com/update_user" for deploying
-        { stocks: { [symbol]: parseInt(quantity, 10) } },
+        "https://capstone-ml1.ew.r.appspot.com/update_user",
+        { stocks: { [symbol]: quantityNumber } },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert("Portfolio updated successfully");
