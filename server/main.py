@@ -104,12 +104,6 @@ def get_monthly_stock_data(symbol, api_key, start_date=None, end_date=None):
 
 
 
-#get users, not using this currently (maybe useful for admin purposes in the future)
-@app.route("/users", methods = ["GET"]) 
-def getusers():
-        users = UserProfile.query.all()
-        json_users = list(map(lambda x: x.to_json(), users))
-        return jsonify ({"users": json_users})
 
 
 @app.route('/create_user', methods=['POST']) #check to see if this works, not implemented into page yet
