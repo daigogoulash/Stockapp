@@ -16,7 +16,7 @@ function App() {
   const [username, setUsername] = useState("");
   const [totalPortfolioValue, setTotalPortfolioValue] = useState(0);
 
-  // Check local storage for token and username when the component mounts
+  // check local storage for token and username when the component mounts
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUsername = localStorage.getItem("username");
@@ -28,7 +28,7 @@ function App() {
   }, []);
 
   const handleLogin = async (usernameInput, password) => {
-    try {
+    try { // make a POST request to the login endpoint
       const loginUrl = "https://capstone-ml1.ew.r.appspot.com/login";
       const response = await fetch(loginUrl, {
         method: "POST",
@@ -37,7 +37,7 @@ function App() {
         },
         body: JSON.stringify({ username: usernameInput, password }),
       });
-
+        // if the response is successful, set the user as logged in
       if (response.ok) {
         const data = await response.json();
         if (data.success) {

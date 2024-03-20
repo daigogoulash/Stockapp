@@ -1,6 +1,5 @@
 import json
-import requests
-import os 
+import requests 
 import logging
 from datetime import datetime
 import datetime
@@ -9,7 +8,6 @@ from config import app, db, un, pw, dsn, apikey
 from models import UserProfile, Stock
 import jwt
 from functools import wraps
-from flask import Flask, jsonify
 import requests
 from flask_cors import CORS
 from sqlalchemy.pool import NullPool
@@ -18,7 +16,7 @@ import oracledb
 CORS(app)  #avoid cross origin errors
 #sensitive db and passkey info passed down to config.py file not in the github
 
-pool = oracledb.create_pool(user=un, password=pw,
+pool = oracledb.create_pool(user=un, password=pw, 
                             dsn=dsn)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'oracle+oracledb://'
@@ -36,10 +34,10 @@ with app.app_context():
 
 
 
-def token_required(f): #token validation
-    @wraps(f)
+def token_required(f): #token validation for secure access
+    @wraps(f) #preserve the original function's metadata
     def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization')
+        token = request.headers.get('Authorization') 
         if not token:
             return jsonify({'message': 'Token is missing!'}), 403
 
@@ -47,7 +45,7 @@ def token_required(f): #token validation
             token = token.split(" ")[1]  #remove the "Bearer " prefix
 
         try:
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"]) #decode the token with secret key
             current_user = UserProfile.query.filter_by(username=data['sub']).first()
         except jwt.ExpiredSignatureError:
             return jsonify({'message': 'Token has expired'}), 401
@@ -58,7 +56,7 @@ def token_required(f): #token validation
 
         return f(current_user, *args, **kwargs)
 
-    return decorated
+    return decorated #return the decorated function
 
 
 def get_stock_value(symbol, api_key): #get stock info
@@ -114,38 +112,6 @@ def getusers():
         return jsonify ({"users": json_users})
 
 
-
-@app.route('/update', methods=['GET']) #this is to load the initial json file to db, not currently using this
-def add_or_update_users():
-    with open('new_user_db.json', 'r') as file:
-        data = json.load(file)
-
-    for username, stocks in data.items():
-        user = UserProfile.query.filter_by(username=username).first()
-        if not user:
-            user = UserProfile(username=username)
-            db.session.add(user)
-            db.session.commit()
-
-        #Update or add stock information
-        for symbol, quantity in stocks.items():
-            stock = Stock.query.filter_by(user_id=user.id, symbol=symbol).first()
-            if stock:
-                stock.quantity = quantity
-            else:
-                new_stock = Stock(symbol=symbol, quantity=quantity, user_id=user.id)
-                db.session.add(new_stock)
-
-    try:
-        db.session.commit()
-        return "Users and stocks added/updated successfully", 200
-    except Exception as e:
-        db.session.rollback()
-        return f"An error occurred: {str(e)}", 500
-
-
-from flask import request, jsonify
-
 @app.route('/create_user', methods=['POST']) #check to see if this works, not implemented into page yet
 def create_user():
     try:
@@ -177,7 +143,7 @@ def login():
         return jsonify({
             "success": True, 
             "message": "Logged in successfully",
-            "token": token
+            "token": token #send the token back to the client
         }), 200
     else:
         #authentication failed
@@ -187,7 +153,7 @@ def login():
 
 
 @app.route('/update_user', methods=['PUT']) #route to update users portfolio, add remove stocks
-@token_required
+@token_required #this means that the user must be logged in to access this route
 def update_user(current_user):
     try:
         data = request.json
@@ -223,7 +189,6 @@ def update_user(current_user):
 @token_required
 def user_portfolio(current_user):
     try:
-        #using current_user directly instead of username from the URL
         portfolio = {}
         total_portfolio_value = 0
 
@@ -253,28 +218,6 @@ def user_portfolio(current_user):
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-@app.route("/api/portfolio/stock/<stock_symbol>", methods=["GET"]) #not currently using this
-@token_required
-def monthly_values(current_user, stock_symbol):
-    try:
-        #check if the specified stock is in the current user's portfolio
-        stock = next((s for s in current_user.stocks if s.symbol == stock_symbol), None)
-        if not stock:
-            return jsonify({"message": "Stock not found in user's portfolio"}), 404
-
-        #fetch monthly stock data
-        stock_value = get_monthly_stock_data(stock.symbol, apikey)
-        if stock_value:
-            return jsonify({"stock_data": stock_value})
-        else:
-            return jsonify({"message": "Stock data not available"}), 404
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 
 @app.route("/api/portfolio/<stock_symbol>", methods=["GET"]) #changed to api/portfolio/stock
 def historical_values(stock_symbol):

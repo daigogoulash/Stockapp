@@ -10,7 +10,7 @@ class UserProfile(db.Model):
     password_hash = db.Column(db.String(128))  #new field for storing hashed passwords
     stocks = db.relationship('Stock', backref='user', lazy=True)
 
-    def set_password(self, password):
+    def set_password(self, password): #password hashing 
         """Create a hashed password."""
         self.password_hash = generate_password_hash(password)
 

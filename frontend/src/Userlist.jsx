@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+
+//not using this, maybe this can be implemented in the future so admins can check userbase in the frontend
 const ContactList = () => {
   const [contacts, setContacts] = useState([]);
 
@@ -16,7 +18,7 @@ const ContactList = () => {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
-      setContacts(data.users); // Assuming the Flask backend sends data in { users: [...] }
+      setContacts(data.users); 
       console.log(data.users);
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
