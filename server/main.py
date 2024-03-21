@@ -32,8 +32,6 @@ with app.app_context():
     db.create_all()
 
 
-
-
 def token_required(f): #token validation for secure access
     @wraps(f) #preserve the original function's metadata
     def decorated(*args, **kwargs):
@@ -57,7 +55,6 @@ def token_required(f): #token validation for secure access
         return f(current_user, *args, **kwargs)
 
     return decorated #return the decorated function
-
 
 def get_stock_value(symbol, api_key): #get stock info
     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=5min&apikey={api_key}"
@@ -100,28 +97,7 @@ def get_monthly_stock_data(symbol, api_key, start_date=None, end_date=None):
         pass
 
     return monthly_data
-
-
-
-
-
-
-@app.route('/create_user', methods=['POST']) #check to see if this works, not implemented into page yet
-def create_user():
-    try:
-        data = request.json
-        username = data['username']
-        password = data['password']  #get the password from the request
-        new_user = UserProfile(username=username)
-        new_user.set_password(password)  #hash the password
-        db.session.add(new_user)
-        db.session.commit()
-        return jsonify({"message": "User and stocks added successfully"}), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
-    
-    
+ 
 @app.route('/login', methods=['POST']) #adding token validation
 def login():
     data = request.json
@@ -142,9 +118,6 @@ def login():
     else:
         #authentication failed
         return jsonify({"success": False, "message": "Invalid username or password"}), 401
-
-
-
 
 @app.route('/update_user', methods=['PUT']) #route to update users portfolio, add remove stocks
 @token_required #this means that the user must be logged in to access this route
@@ -175,9 +148,6 @@ def update_user(current_user):
         db.session.rollback()
         app.logger.error(f"Exception: {e}", exc_info=True)  #log the full exception
         return jsonify({"error": str(e)}), 500
-
-
-
 
 @app.route('/api/portfolio', methods=['GET']) 
 @token_required
@@ -236,7 +206,6 @@ def historical_values(stock_symbol):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-
 if __name__ == "__main__":
     app.run(debug = True)
 
